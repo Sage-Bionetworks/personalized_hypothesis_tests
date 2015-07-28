@@ -499,6 +499,7 @@ synFig7 <- synStore(File(fig7, parentId=synFolder), activity=act)
 ## Figure 8
 ########################################
 
+load(realStudy@filePath)
 
 ## get participants that performed at least 30 tapping
 ## tasks before medication, and 30 after medication, and
