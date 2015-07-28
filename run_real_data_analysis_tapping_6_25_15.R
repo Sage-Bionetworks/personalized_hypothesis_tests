@@ -29,9 +29,9 @@ tapSubset <- synGet("syn4649829")
 load(tapSubset@filePath)
 
 ## activity used for this analysis
-act <- Activity(name="Simulate Data",
+act <- Activity(name="Real Data Analysis",
                 used=list(tapSubset, list(url=hypTestCode, name=basename(hypTestCode))),
-                executed=list(url=thisCode, name=basename(thisCode)))
+                executed=list(list(url=thisCode, name=basename(thisCode))))
 act <- synStore(act)
 
 

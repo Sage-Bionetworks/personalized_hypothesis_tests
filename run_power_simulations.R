@@ -28,7 +28,7 @@ hypTestCode <- getPermlink(repo, 'personalized_hypothesis_tests_functions.R')
 ## activity used for creating simulated data
 act <- Activity(name="Simulate Data",
                 used=list(list(url=hypTestCode, name=basename(hypTestCode))),
-                executed=list(url=thisCode, name=basename(thisCode)))
+                executed=list(list(url=thisCode, name=basename(thisCode))))
 act <- synStore(act)
 
 ## create an empty list to store the results of the

@@ -48,7 +48,7 @@ synFolder <- "syn4736405"
 ## activity used for generating figures
 act <- Activity(name="Figure Generation",
                 used=list(tapSubset, simStudy, realStudy, list(url=hypTestCode, name=basename(hypTestCode)), list(url=auxCode, name=basename(auxCode))),
-                executed=list(url=thisCode, name=basename(thisCode)))
+                executed=list(list(url=thisCode, name=basename(thisCode))))
 act <- synStore(act)
 
 ########################################
