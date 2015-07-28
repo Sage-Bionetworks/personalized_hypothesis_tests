@@ -8,20 +8,33 @@
 ## patients using iPhone sensor data. 
 #############################################################
 
-library(devtools)
+require(devtools)
+require(rGithubClient)
+require(synapseClient)
+synapseLogin()
+
+## pointer to this code in github
+repo <- getRepo('Sage-Bionetworks/personalized_hypothesis_tests')
+thisCode <- getPermlink(repo, 'run_real_data_analysis_tapping_6_25_15.R')
 
 ## source functions for shaping the data and running
 ## the personalized hypotheis tests
-##
-#source("personalized_hypothesis_tests_functions.R")
-source_url("https://raw.githubusercontent.com/Sage-Bionetworks/personalized_hypothesis_tests/master/personalized_hypothesis_tests_functions.R?token=ABoVeay25neuXIVrxREoWsVq7bxjautrks5VvLRawA%3D%3D")
+sourceRepoFile(repo, 'personalized_hypothesis_tests_functions.R')
+hypTestCode <- getPermlink(repo, 'personalized_hypothesis_tests_functions.R')
 
 ## load the tapping data on the subset of 57 patients
 ## that performed at least 30 tapping tasks before medication
 ## and 30 tapping tasks after medication
-##
-#load("patients_subset_tapping_6_25_15.RData")
-load(synGet("syn4649829")@filePath) ## load directly from Synapse
+tapSubset <- synGet("syn4649829")
+load(tapSubset@filePath)
+
+## activity used for this analysis
+act <- Activity(name="Simulate Data",
+                used=list(tapSubset, list(url=hypTestCode, name=basename(hypTestCode))),
+                executed=list(url=thisCode, name=basename(thisCode)))
+act <- synStore(act)
+
+
 
 ## generate random seeds used in the train/test data splits
 ##
@@ -83,7 +96,7 @@ o4 <- RunPerClassTests(sel, nRuns, scases, nSplits, splitSeeds, respName, featNa
                        EnetTest, alphaGrid = seq(0.1, 0.9, by = 0.1), nfolds = 3)
 
 
-## save the tests outputs
-##
-save(o0, o1, o2, o3, o4, file = "real_data_analysis_outputs.RData", compress = TRUE)
-
+## save the results
+realFile <- file.path(tempdir(), "real_data_analysis_outputs.RData")
+save(o0, o1, o2, o3, o4, file = realFile, compress = TRUE)
+synReal <- synStore(File(realFile, parentId="syn4649811"), activity=act)

@@ -11,44 +11,49 @@
 ## patients using iPhone sensor data. 
 ###############################################################
 
-library(devtools)
+require(devtools)
+require(rGithubClient)
+require(synapseClient)
+synapseLogin()
 
-## source functions for shaping the data, and running
+## pointer to this code in github
+repo <- getRepo('Sage-Bionetworks/personalized_hypothesis_tests')
+thisCode <- getPermlink(repo, 'run_power_simulations.R')
+
+## source functions for shaping the data and running
 ## the personalized hypotheis tests
-##
-#source("personalized_hypothesis_tests_functions.R")
-source_url("https://raw.githubusercontent.com/Sage-Bionetworks/personalized_hypothesis_tests/master/personalized_hypothesis_tests_functions.R?token=ABoVeay25neuXIVrxREoWsVq7bxjautrks5VvLRawA%3D%3D")
+sourceRepoFile(repo, 'personalized_hypothesis_tests_functions.R')
+hypTestCode <- getPermlink(repo, 'personalized_hypothesis_tests_functions.R')
 
+## activity used for creating simulated data
+act <- Activity(name="Simulate Data",
+                used=list(list(url=hypTestCode, name=basename(hypTestCode))),
+                executed=list(url=thisCode, name=basename(thisCode)))
+act <- synStore(act)
 
 ## create an empty list to store the results of the
 ## 6 simulation experiments
-##
 powerSim <- vector(mode = "list", length = 6)
 names(powerSim) <- c("n = 50,  p = 10", "n = 50,  p = 50", "n = 50,  p = 200", 
                      "n = 150,  p = 10", "n = 150,  p = 50", "n = 150,  p = 200") 
 
 
 ## run the simulations
-##
 nRuns <- 1000
 powerSim[[1]] <- RunSimulations(nRuns, n = 50, p = 10, a = 0.25, maxsig = 3, pmaxsig = 10,
                                 err = 0.1, myseed = 1001, nSplits = 2)
-##
 powerSim[[2]] <- RunSimulations(nRuns, n = 50, p = 50, a = 0.25, maxsig = 3, pmaxsig = 10,
                                 err = 0.1, myseed = 1002, nSplits = 2)
-##
 powerSim[[3]] <- RunSimulations(nRuns, n = 50, p = 200, a = 0.25, maxsig = 3, pmaxsig = 10,
                                 err = 0.1, myseed = 1003, nSplits = 2)
-##
 powerSim[[4]] <- RunSimulations(nRuns, n = 150, p = 10, a = 0.25, maxsig = 3, pmaxsig = 10,
                                 err = 0.1, myseed = 1004, nSplits = 2)
-##
 powerSim[[5]] <- RunSimulations(nRuns, n = 150, p = 50, a = 0.25, maxsig = 3, pmaxsig = 10,
                                 err = 0.1, myseed = 1005, nSplits = 2)
-##
 powerSim[[6]] <- RunSimulations(nRuns, n = 150, p = 200, a = 0.25, maxsig = 3, pmaxsig = 10,
                                 err = 0.1, myseed = 1006, nSplits = 2)
 
 ## save the results
-##
-save(powerSim, file = "power_simulation_study_outputs.RData", compress = TRUE)
+simFile <- file.path(tempdir(), "power_simulation_study_outputs.RData")
+save(powerSim, file = simFile, compress = TRUE)
+synSim <- synStore(File(simFile, parentId="syn4649811"), activity=act)
